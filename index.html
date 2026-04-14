@@ -1,25 +1,27 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GasmanPulse | 2026 High-Impact Digest</title>
+    <title>GasmanPulse | High-Impact Anaesthesia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loader { border-top-color: #3b82f6; animation: spinner 1s linear infinite; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-12 font-sans">
+<body class="bg-slate-50 min-h-screen pb-20 font-sans text-slate-900">
 
-    <nav class="bg-blue-900 text-white p-4 mb-8 shadow-lg">
+    <nav class="bg-blue-900 text-white p-5 mb-8 shadow-xl sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-tighter italic">GASMAN<span class="text-blue-400">PULSE</span></h1>
-            <div class="flex gap-6">
-                <button onclick="switchTab('digest')" class="text-xs uppercase font-bold tracking-widest hover:text-blue-300 transition">Digest</button>
-                <button onclick="switchTab('quiz')" class="text-xs uppercase font-bold tracking-widest hover:text-blue-300 transition">Quiz</button>
+            <h1 class="text-xl font-black tracking-tighter italic">GASMAN<span class="text-blue-400">PULSE</span></h1>
+            <div class="flex gap-8">
+                <button onclick="switchTab('digest')" class="text-[10px] uppercase font-bold tracking-[0.2em] hover:text-blue-300 transition">Digest</button>
+                <button onclick="switchTab('quiz')" class="text-[10px] uppercase font-bold tracking-[0.2em] hover:text-blue-300 transition">Quiz</button>
             </div>
         </div>
     </nav>
@@ -27,186 +29,162 @@
     <main class="max-w-2xl mx-auto px-4">
         
         <section id="tab-digest">
-            <div class="mb-8">
-                <button onclick="runPulse()" id="main-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 shadow-xl transition-all active:scale-[0.98]">
-                    Fetch Practice-Changing Research
+            <div class="mb-10 text-center">
+                <button onclick="runPulse()" id="main-btn" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] hover:bg-blue-700 shadow-2xl transition-all active:scale-[0.97]">
+                    Fetch Fresh Trials
                 </button>
-                <p class="text-center text-[10px] text-slate-400 mt-3 uppercase tracking-widest italic font-medium">Scanning Top 30 Anaesthesia & Pain Journals</p>
+                <p class="text-[9px] text-slate-400 mt-4 uppercase tracking-[0.3em] font-bold">Randomized Sampling • Top 30 Journals • Last 90 Days</p>
             </div>
 
-            <div id="results-area" class="space-y-6">
+            <div id="results-area" class="space-y-8 text-left">
                 </div>
         </section>
 
         <section id="tab-quiz" class="hidden">
             <div id="quiz-content" class="text-center">
-                <p class="text-slate-400 italic py-20 border-2 border-dashed border-slate-200 rounded-3xl">Generate a digest first to build your daily quiz.</p>
+                <div class="py-24 border-4 border-dashed border-slate-200 rounded-[3rem] bg-white/50">
+                    <p class="text-slate-400 font-medium italic">Generate a digest first to unlock today's quiz.</p>
+                </div>
             </div>
         </section>
     </main>
 
     <script>
-        // --- CONFIGURATION ---
-        const API_KEY = "AIzaSyDgYwY6lUJLHM17EfYCxoIWLgzzo_S_3-Q"; 
-        const PROXY = "https://cors-anywhere.herokuapp.com/";
-        const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+        // Curated high-impact list
+        const journals = ["British Journal of Anaesthesia", "Anesthesiology", "Anaesthesia", "European Journal of Anaesthesiology", "Pain", "Journal of Clinical Anesthesia", "Anaesthesia Critical Care & Pain Medicine", "Anesthesia and Analgesia", "Regional Anesthesia and Pain Medicine", "European Journal of Pain", "Canadian Journal of Anesthesia", "Clinical Journal of Pain", "Pain Medicine", "Minerva Anestesiologica", "Best Practice & Research Clinical Anaesthesiology", "Pain Practice", "Journal of Anesthesia", "BMC Anesthesiology", "Pain Physician", "Journal of Neurosurgical Anesthesiology", "International Journal of Obstetric Anesthesia", "Journal of Clinical Monitoring and Computing", "Perioperative Medicine", "Journal of Cardiothoracic and Vascular Anesthesia", "Current Opinion in Anesthesiology", "Acta Anaesthesiologica Scandinavica", "Brazilian Journal of Anesthesiology", "Pediatric Anesthesiology", "Anaesthesia and Intensive Care"];
 
-        const journals = [
-            "British Journal of Anaesthesia", "Anesthesiology", "Anaesthesia", "European Journal of Anaesthesiology", 
-            "Pain", "Journal of Clinical Anesthesia", "Anaesthesia Critical Care & Pain Medicine", "Anesthesia and Analgesia", 
-            "Regional Anesthesia and Pain Medicine", "European Journal of Pain", "Canadian Journal of Anesthesia", 
-            "Clinical Journal of Pain", "Pain Medicine", "Minerva Anestesiologica", "Best Practice & Research Clinical Anaesthesiology", 
-            "Pain Practice", "Journal of Anesthesia", "BMC Anesthesiology", "Pain Physician", "Journal of Neurosurgical Anesthesiology", 
-            "International Journal of Obstetric Anesthesia", "Journal of Clinical Monitoring and Computing", "Perioperative Medicine", 
-            "Journal of Cardiothoracic and Vascular Anesthesia", "Current Opinion in Anesthesiology", "Acta Anaesthesiologica Scandinavica", 
-            "Brazilian Journal of Anesthesiology", "Pediatric Anesthesiology", "Anaesthesia and Intensive Care"
-        ];
-
-        let fetchedAbstracts = "";
+        let currentPapers = []; 
+        let idPool = [];        
 
         function switchTab(tab) {
             document.getElementById('tab-digest').classList.toggle('hidden', tab !== 'digest');
             document.getElementById('tab-quiz').classList.toggle('hidden', tab !== 'quiz');
-        }
-
-        async function callAI(prompt) {
-            const response = await fetch(PROXY + GEMINI_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "x-goog-api-key": API_KEY },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            return data.candidates[0].content.parts[0].text;
+            window.scrollTo(0, 0);
         }
 
         async function runPulse() {
             const resultsArea = document.getElementById('results-area');
             const btn = document.getElementById('main-btn');
             btn.disabled = true;
-            btn.innerText = "SHUFFLING LATEST TRIALS...";
-            resultsArea.innerHTML = `<div class="flex justify-center p-20"><div class="loader h-10 w-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div></div>`;
+            btn.innerText = "SHUFFLING RECENT TRIALS...";
+            resultsArea.innerHTML = `<div class="flex justify-center p-20"><div class="loader h-12 w-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div></div>`;
 
             try {
-                const journalQuery = journals.map(j => `"${j}"[Journal]`).join(" OR ");
+                const response = await fetch('/api/pulse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ journals, mode: 'digest' })
+                });
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+
+                currentPapers = result.data; 
+                idPool = result.allIds;      
                 
-                // Simplified query using reldate=90 for the last 3 months
-                const finalQuery = `(${journalQuery}) AND (clinicaltrial[Filter] OR randomizedcontrolledtrial[Filter])`;
-
-                // Search a massive pool of 1000 papers from the last 90 days
-                const searchRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(finalQuery)}&retmax=1000&reldate=90&datetype=pdat&retmode=json`);
-                const searchData = await searchRes.json();
-                let ids = searchData.esearchresult.idlist;
-
-                if (!ids || ids.length === 0) throw new Error("No recent trials found in the last 90 days.");
-
-                // Pick 5 random papers from that pool of 1000
-                const shuffledIds = ids.sort(() => 0.5 - Math.random()).slice(0, 5);
-
-                btn.innerText = "ANALYZING RANDOM SAMPLE...";
-                const fetchRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${shuffledIds.join(",")}&rettype=abstract&retmode=text`);
-                fetchedAbstracts = await fetchRes.text();
-
-                // Prompt for JSON formatted Digest
-                const prompt = `Return a JSON array of objects for these abstracts. Format: [{"title": "", "journal": "", "finding": "", "takeaway": "", "pmid": ""}] 
-                Abstracts: ${fetchedAbstracts}`;
-                
-                const aiRes = await callAI(prompt);
-                const papers = JSON.parse(aiRes.replace(/```json|```/g, ""));
-                
-                renderDigest(papers);
-                
-                // Update Quiz Button for 10 questions
-                document.getElementById('quiz-content').innerHTML = `
-                    <button onclick="generateQuiz()" class="bg-emerald-600 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-emerald-700 shadow-lg transition">
-                        Start 10-Question Knowledge Check
-                    </button>`;
-
+                renderDigest();
+                updateQuizPlaceholder();
             } catch (err) {
-                resultsArea.innerHTML = `<div class="bg-red-50 p-6 rounded-xl text-red-800 border border-red-200 text-sm text-center">
-                    <strong>Fetch Error:</strong> ${err.message}
-                </div>`;
+                resultsArea.innerHTML = `<div class="bg-red-50 p-8 rounded-3xl text-red-800 border border-red-100 text-center"><p class="font-bold">Fetch Failed</p><p class="text-xs mt-2 opacity-70">${err.message}</p></div>`;
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Fetch Practice-Changing Research";
+                btn.innerText = "Fetch Fresh Trials";
             }
         }
 
-        function renderDigest(papers) {
+        function renderDigest() {
             const container = document.getElementById('results-area');
-            container.innerHTML = papers.map(p => `
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all">
-                    <h3 class="text-lg font-black text-slate-900 leading-tight mb-1">${p.title}</h3>
-                    <p class="text-xs italic text-blue-600 font-medium mb-6 uppercase tracking-wider">${p.journal}</p>
+            container.innerHTML = currentPapers.map((p, index) => `
+                <div id="paper-${index}" class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative animate-fade-in hover:shadow-md transition-shadow">
+                    <button onclick="rejectPaper(${index})" class="absolute top-8 right-8 text-slate-200 hover:text-red-500 transition-colors" title="Reject & Swap">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <h3 class="text-xl font-black text-slate-900 leading-tight mb-2 pr-12">${p.title}</h3>
+                    <p class="text-[10px] italic text-blue-600 font-bold mb-8 uppercase tracking-widest">${p.journal}</p>
                     
-                    <div class="space-y-4 mb-6">
+                    <div class="space-y-6 mb-8 text-sm leading-relaxed">
                         <div>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Finding</span>
-                            <p class="text-sm text-slate-700 mt-1">${p.finding}</p>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Finding</span>
+                            <p class="text-slate-700 mt-2">${p.finding}</p>
                         </div>
                         <div>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Clinical Takeaway</span>
-                            <p class="text-sm text-slate-900 font-semibold mt-1 italic">"${p.takeaway}"</p>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Clinical Takeaway</span>
+                            <p class="text-slate-900 font-bold mt-2 italic border-l-4 border-blue-100 pl-4">"${p.takeaway}"</p>
                         </div>
                     </div>
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/" target="_blank" class="inline-block text-[10px] font-black text-slate-400 hover:text-blue-600 transition uppercase tracking-widest">View Full Abstract ↗</a>
+                </div>`).join('');
+        }
 
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/" target="_blank" class="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition flex items-center gap-1 uppercase tracking-widest">
-                        View on PubMed ↗
-                    </a>
-                </div>
-            `).join('');
+        async function rejectPaper(index) {
+            const card = document.getElementById(`paper-${index}`);
+            card.innerHTML = `<div class="flex flex-col items-center py-16"><div class="loader h-6 w-6 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div><p class="text-[9px] mt-4 uppercase font-bold text-slate-300 tracking-widest">Swapping Card...</p></div>`;
+
+            try {
+                const displayedPmids = currentPapers.map(p => p.pmid);
+                const availableIds = idPool.filter(id => !displayedPmids.includes(id));
+                const newId = availableIds[Math.floor(Math.random() * availableIds.length)];
+
+                const response = await fetch('/api/pulse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ specificId: newId, mode: 'digest' }) 
+                });
+                const result = await response.json();
+                
+                currentPapers[index] = result.data[0];
+                renderDigest();
+                updateQuizPlaceholder();
+            } catch (err) { 
+                card.innerHTML = `<p class="text-[10px] text-red-500 italic p-10 text-center">Swap failed: ${err.message}</p>`; 
+            }
+        }
+
+        function updateQuizPlaceholder() {
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="py-12">
+                    <button onclick="generateQuiz()" class="bg-emerald-600 text-white px-12 py-5 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-emerald-700 shadow-xl transition-all active:scale-95">
+                        Start 10-Question Knowledge Check
+                    </button>
+                    <p class="text-[9px] text-slate-400 mt-6 uppercase tracking-widest font-bold italic">Generated from current selection of papers</p>
+                </div>`;
         }
 
         async function generateQuiz() {
             const quizContent = document.getElementById('quiz-content');
-            quizContent.innerHTML = `<div class="loader h-8 w-8 border-4 border-slate-200 border-t-emerald-600 rounded-full mx-auto"></div><p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Generating 10 High-Yield Cards...</p>`;
+            quizContent.innerHTML = `<div class="py-20 flex flex-col items-center"><div class="loader h-10 w-10 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div><p class="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyzing selection for high-yield questions...</p></div>`;
             
             try {
-                // Updated prompt to include PMID in the JSON for the quiz
-                const prompt = `Based on these abstracts, generate 10 clinical MCQs. 
-                Focus on methodology and primary outcomes.
-                Return ONLY a JSON array: [{"question": "", "options": ["A", "B", "C"], "correct": "Letter", "explanation": "", "pmid": ""}]
-                Abstracts: ${fetchedAbstracts}`;
+                const visibleIds = currentPapers.map(p => p.pmid);
+                const response = await fetch('/api/pulse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ specificId: visibleIds.join(","), mode: 'quiz' })
+                });
+                const result = await response.json();
                 
-                const res = await callAI(prompt);
-                const quizData = JSON.parse(res.replace(/```json|```/g, ""));
-                
-                quizContent.innerHTML = `<div class="max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar text-left">` + 
-                    quizData.map((q, i) => `
-                        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm mb-6 overflow-hidden animate-fade-in">
-                            <div class="p-6 bg-slate-50 border-b border-slate-100">
-                                <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest font-mono">Card ${String(i+1).padStart(2, '0')}</span>
-                                <p class="text-slate-900 font-bold mt-2 leading-snug">${q.question}</p>
+                quizContent.innerHTML = `<div class="max-h-[75vh] overflow-y-auto pr-4 custom-scrollbar text-left">` + result.data.map((q, i) => `
+                    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm mb-6 overflow-hidden animate-fade-in">
+                        <div class="p-8 bg-slate-50 border-b border-slate-100">
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest font-mono">Flashcard ${String(i+1).padStart(2, '0')}</span>
+                            <p class="text-slate-900 font-bold mt-3 leading-snug text-lg">${q.question}</p>
+                        </div>
+                        <div class="p-8">
+                            <div class="space-y-3 mb-8 text-sm text-slate-600">
+                                ${q.options.map(opt => `<div class="p-4 border border-slate-100 rounded-2xl bg-slate-50/50 font-medium">${opt}</div>`).join('')}
                             </div>
-                            <div class="p-6">
-                                <div class="space-y-2 mb-6 text-sm text-slate-600">
-                                    ${q.options.map(opt => `<div class="p-3 border border-slate-100 rounded-xl bg-slate-50/50">${opt}</div>`).join('')}
-                                </div>
-                                
-                                <div class="flex flex-col gap-3">
-                                    <button onclick="document.getElementById('ans-${i}').classList.toggle('hidden')" 
-                                            class="w-full text-[10px] font-black uppercase tracking-widest text-emerald-700 py-3 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition">
-                                        Reveal Rationale
-                                    </button>
-                                    
-                                    <a href="https://pubmed.ncbi.nlm.nih.gov/${q.pmid}/" target="_blank" 
-                                    class="text-center text-[9px] font-bold text-slate-300 hover:text-blue-500 uppercase tracking-widest transition">
-                                        Verify Source on PubMed ↗
-                                    </a>
-                                </div>
-
-                                <div id="ans-${i}" class="hidden mt-4 p-5 bg-emerald-600 rounded-2xl text-white animate-fade-in text-sm font-medium">
-                                    <p class="font-black mb-2 uppercase tracking-widest text-[10px] text-emerald-200">Result: Correct Answer ${q.correct}</p>
-                                    <p class="leading-relaxed opacity-95">${q.explanation}</p>
-                                </div>
+                            <div class="flex flex-col gap-4 text-center">
+                                <button onclick="document.getElementById('ans-${i}').classList.toggle('hidden')" class="w-full text-[10px] font-black uppercase tracking-widest text-emerald-700 py-4 bg-emerald-50 rounded-2xl hover:bg-emerald-100 transition">Reveal Rationale</button>
+                                <a href="https://pubmed.ncbi.nlm.nih.gov/${q.pmid}/" target="_blank" class="text-[9px] font-bold text-slate-300 hover:text-blue-500 uppercase tracking-[0.2em] transition">Verify Source ↗</a>
+                            </div>
+                            <div id="ans-${i}" class="hidden mt-6 p-6 bg-emerald-600 rounded-[1.5rem] text-white animate-fade-in text-sm leading-relaxed shadow-inner">
+                                <p class="font-black mb-3 uppercase tracking-widest text-[10px] text-emerald-100">Answer: ${q.correct}</p>
+                                <p class="opacity-95 font-medium">${q.explanation}</p>
                             </div>
                         </div>
-                    `).join('') + `</div>` +
-                    `<button onclick="switchTab('digest')" class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mt-8 hover:text-blue-600 transition">← Back to Digest</button>`;
-                    
-            } catch (err) { 
-                quizContent.innerHTML = `<div class="p-10 text-red-500 text-sm">Quiz Generation Failed: ${err.message}</div>`; 
-            }
+                    </div>`).join('') + `</div><button onclick="switchTab('digest')" class="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] mt-10 hover:text-blue-600 transition block mx-auto">← Back to Literature</button>`;
+            } catch (err) { quizContent.innerHTML = `<div class="bg-red-50 p-10 rounded-3xl text-red-800 text-sm">Failed to generate quiz: ${err.message}</div>`; }
         }
     </script>
 </body>
